@@ -19,17 +19,17 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.log4j.Logger;
 
-public class FriendII extends Configured implements Tool {
+public class PageLink extends Configured implements Tool {
 
-  private static final Logger LOG = Logger.getLogger(FriendII.class);
+  private static final Logger LOG = Logger.getLogger(PageLink.class);
 
   public static void main(String[] args) throws Exception {
-    int res = ToolRunner.run(new FriendII(), args);
+    int res = ToolRunner.run(new PageLink(), args);
     System.exit(res);
   }
 
   public int run(String[] args) throws Exception {
-    Job job = Job.getInstance(getConf(), "FriendII");
+    Job job = Job.getInstance(getConf(), "PageLink");
     job.setJarByClass(this.getClass());
     FileInputFormat.addInputPath(job, new Path(args[0]));
     FileOutputFormat.setOutputPath(job, new Path(args[1]));
@@ -97,48 +97,6 @@ public class FriendII extends Configured implements Tool {
   public static class Reduce extends Reducer<Text, List<Text>, Text, List<Text>> {
     public void reduce(Text fromNode, List<Text> toNodes, Context context) throws IOException, InterruptedException {
     	context.write(fromNode, toNodes);    	
-    	/*HashMap<Text, List<Text>> usersAndFriends = new HashMap<Text, List<Text>>();
-    	HashMap<List<Text>, List<Text>> theResults = new HashMap<List<Text>, List<Text>>();
-    	List<Text> theFriends = new ArrayList<Text>();
-    	List<Text> resultMatchNames = new ArrayList<Text>();
-    	
-    	for(Text friend : friends){
-    		if(usersAndFriends.get(user)==null && usersAndFriends.get(friend)==null){
-    			theFriends.add(friend);
-        		usersAndFriends.put(user, theFriends);
-        		theFriends.remove(friend);
-    		}else{
-    			Text newFriend = new Text(friend);
-    			usersAndFriends.get(user).add(newFriend);	
-    		}
-    	}
-    	for (Entry<Text, List<Text>> entry : usersAndFriends.entrySet()) {
-    	    Text me = entry.getKey();
-    	    List<Text> myFriends = entry.getValue();
-    	    //context.write(me, myFriends);
-    	    
-    	    for(Text myFriend : myFriends){
-    	    	List<Text>myFriendsToRetain = new ArrayList<Text>(myFriends);
-    	    	List<Text>otherPersonFriends = usersAndFriends.get(myFriend);
-    	    	//if(otherPersonFriends != null){
-	    	    	myFriendsToRetain.retainAll(otherPersonFriends);
-	    	    	if(myFriendsToRetain != null){
-	    	    		Text meForListSave = new Text(me);
-	    				Text myFriendForListSave = new Text(myFriend);
-	    				resultMatchNames.add(meForListSave);
-	    				resultMatchNames.add(myFriendForListSave);
-	    				theResults.put(resultMatchNames,myFriendsToRetain);
-	    				resultMatchNames.remove(meForListSave);
-	    				resultMatchNames.remove(myFriendForListSave);
-	    	    	//}
-    	    	}
-    		}
-    	}
-    	for (Entry<List<Text>, List<Text>> entry : theResults.entrySet()) {
-    	    List<Text> resultPairs = entry.getKey();
-    	    List<Text> resultPairFriends = entry.getValue();
-    	    context.write(resultPairs, resultPairFriends);
-    	}*/
     }
   }
 }
