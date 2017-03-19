@@ -19,12 +19,17 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.log4j.Logger;
 
-public class InputConverter extends Configured implements Tool {
+public class InputConverterAndPageLink extends Configured implements Tool {
 
-	private static final Logger LOG = Logger.getLogger(InputConverter.class);
+	private static final Logger LOG = Logger.getLogger(InputConverterAndPageLink.class);
+
+	private static int count_from_nodes = 0;
+	private static int nodeStartGetal = 0;
+	private static int totaalAantalNodes = 0;
+	private static int HETGetal = 1000;
 
 	public static void main(String[] args) throws Exception {
-		int res = ToolRunner.run(new InputConverter(), args);
+		int res = ToolRunner.run(new InputConverterAndPageLink(), args);
 		System.exit(res);
 	}
 
@@ -49,11 +54,12 @@ public class InputConverter extends Configured implements Tool {
 		job2.setReducerClass(Reduce_PageLink.class);
 		job2.setOutputKeyClass(Text.class);
 		job2.setOutputValueClass(Text.class);
-		
+
 		return job2.waitForCompletion(true) ? 0 : 1;
 	}
 
-	public static class Map_Converter extends Mapper<LongWritable, Text, Text, Text> {
+	public static class Map_Converter extends
+			Mapper<LongWritable, Text, Text, Text> {
 		private Text word = new Text();
 		private String input;
 
@@ -80,12 +86,14 @@ public class InputConverter extends Configured implements Tool {
 				toNode = new Text(word);
 				if (!toNode.equals(fromNode)) {
 					context.write(fromNode, toNode);
+					totaalAantalNodes++;
 				}
 			}
 		}
 	}
 
-	public static class Reduce_Converter extends Reducer<Text, Text, Text, List<Text>> {
+	public static class Reduce_Converter extends
+			Reducer<Text, Text, Text, List<Text>> {
 		public void reduce(Text fromNode, Iterable<Text> toNodes,
 				Context context) throws IOException, InterruptedException {
 			HashMap<Text, List<Text>> fromNodeToNodes = new HashMap<Text, List<Text>>();
@@ -110,7 +118,7 @@ public class InputConverter extends Configured implements Tool {
 			}
 		}
 	}
-	
+
 	public static class Map_PageLink extends Mapper<LongWritable, Text, Text, Text> {
 		private Text word = new Text();
 		private String input;
@@ -130,22 +138,34 @@ public class InputConverter extends Configured implements Tool {
 			String line = lineText.toString();
 			Text toNode = new Text();
 			Text fromNode = new Text(line.split("\t")[0]);
+			Text valueNode = new Text();
 
+			count_from_nodes = 0;
+			;
 			for (String word : line.split("\t")) {
+				count_from_nodes++;
+				if (word.isEmpty()) {
+					continue;
+				}
+			}
+			double value = HETGetal / totaalAantalNodes / count_from_nodes;
+			valueNode = new Text(value + "");
+			for (String word : line.split("\t")) {
+				count_from_nodes++;
 				if (word.isEmpty()) {
 					continue;
 				}
 				toNode = new Text(word);
 				if (!toNode.equals(fromNode)) {
-					context.write(fromNode, toNode);
+					context.write(toNode, valueNode);
 				}
 			}
 		}
 	}
 
 	public static class Reduce_PageLink extends Reducer<Text, Text, Text, List<Text>> {
-		public void reduce(Text fromNode, Iterable<Text> toNodes,
-				Context context) throws IOException, InterruptedException {
+		public void reduce(Text fromNode, Iterable<Text> toNodes, Context context) throws IOException, InterruptedException {
+        /*
 			HashMap<Text, List<Text>> fromNodeToNodes = new HashMap<Text, List<Text>>();
 			List<Text> theToNodes = new ArrayList<Text>();
 
@@ -166,6 +186,7 @@ public class InputConverter extends Configured implements Tool {
 				List<Text> toNodesEntry = hashMapEntry.getValue();
 				context.write(fromNodeEntry, toNodesEntry);
 			}
+          */
 		}
 	}
 }
