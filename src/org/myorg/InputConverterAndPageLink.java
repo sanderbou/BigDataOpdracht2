@@ -150,9 +150,11 @@ public class InputConverterAndPageLink extends Configured implements Tool {
 			
 			BigDecimal firstDivide = HETGetal.divide(totaalAantalNodes,20,BigDecimal.ROUND_DOWN);
 			BigDecimal value = firstDivide.divide(count_to_nodes,20,BigDecimal.ROUND_DOWN);
-			value.add(firstDivide);l
+			value.add(firstDivide);
+			
 			pageLinkValueNode = new Text(value + "");
 			
+			context.write(fromNode, new Text(0+""));
 			for(String node : toNodes.split(", ")){
 				context.write(new Text(node), pageLinkValueNode);
 			}
